@@ -295,10 +295,15 @@ const hoy=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)
 function nF(f){
   if(!f||f==='') return '';
   const s=String(f).trim();
-  // Formato "Wed May 20 2026 00:00:00 GMT..." - viene de Date.toString()
-  if(s.match(/^[A-Z][a-z]{2}\s/)){
-    const d=new Date(s);
-    if(!isNaN(d)) return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  // Formato "Wed May 20 2026 00:00:00 GMT..." (viene de Date.toString() en el backend).
+  // A veces llega recortado (ej. termina en "GM" en vez de "GMT"), así que
+  // parseamos con regex en vez de confiar en new Date(), que falla si el
+  // texto está incompleto.
+  const mDT=s.match(/^[A-Za-z]{3}\s+([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+  if(mDT){
+    const MESES_EN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const mi=MESES_EN.indexOf(mDT[1]);
+    if(mi>=0) return mDT[3]+'-'+pad(mi+1)+'-'+pad(+mDT[2]);
   }
   // Formato ISO con T
   const st=s.split('T')[0].trim();
