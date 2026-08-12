@@ -292,9 +292,22 @@ const hoy=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)
 
 function nF(f){
   if(!f||f==='') return '';
-  const s=String(f).split('T')[0].trim();
-  if(s.includes('/')){const p=s.split('/');return p[2]+'-'+pad(+p[1])+'-'+pad(+p[0])}
-  return s;
+  const s=String(f).trim();
+  // Formato "Wed May 20 2026 00:00:00 GMT..." - viene de Date.toString()
+  if(s.match(/^[A-Z][a-z]{2}\s/)){
+    const d=new Date(s);
+    if(!isNaN(d)) return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  }
+  // Formato ISO con T
+  const st=s.split('T')[0].trim();
+  // Formato dd/mm/yyyy
+  if(st.includes('/')){const p=st.split('/');if(p.length===3&&p[2].length===4)return p[2]+'-'+pad(+p[1])+'-'+pad(+p[0])}
+  // Formato yyyy-mm-dd
+  if(st.match(/^\d{4}-\d{2}-\d{2}$/)) return st;
+  // Intentar parsear cualquier otra cosa
+  const d=new Date(s);
+  if(!isNaN(d)) return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  return st;
 }
 function fF(f){
   const s=nF(f);if(!s||!s.includes('-')) return '';
