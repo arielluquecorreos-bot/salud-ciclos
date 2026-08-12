@@ -224,6 +224,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5}
       <div class="card">
         <div class="ctitle">Datos locales</div>
         <div style="font-size:15px;color:var(--gt)" id="cant-local">—</div>
+        <button class="bsec" onclick="diag()">🔍 Ver diagnóstico de fechas</button>
+        <pre id="diag-out" style="display:none;white-space:pre-wrap;word-break:break-all;font-size:12px;background:var(--gf);border-radius:10px;padding:10px;margin-top:10px"></pre>
         <button class="bsec bpel" style="margin-top:14px" onclick="borrarTodo()">🗑️ Borrar todos los datos locales</button>
       </div>
     </div>
@@ -664,6 +666,12 @@ function renderCfg(){
     :'<div style="padding:12px 0;font-size:15px;color:var(--gt)">Sin datos este año</div>';
 }
 
+function diag(){
+  const el=document.getElementById('diag-out');
+  const muestra=D.slice(0,6).map(d=>({id:d.id,tipo:d.tipo,fecha:d.fecha}));
+  el.textContent='Total: '+D.length+' registros\n\n'+JSON.stringify(muestra,null,2)+'\n\nAño actual detectado: '+new Date().getFullYear();
+  el.style.display='block';
+}
 function borrarTodo(){
   if(!confirm('¿Borrar TODOS los datos locales?')) return;
   if(!confirm('¿Seguro? No se puede deshacer.')) return;
