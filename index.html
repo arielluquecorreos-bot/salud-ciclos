@@ -331,12 +331,13 @@ function dedup(arr){
   return r.sort((a,b)=>nF(b.fecha).localeCompare(nF(a.fecha)));
 }
 
-// IMPORTAR con JSONP
-function importar(){
+// IMPORTAR - ahora usa fetch normal en vez de JSONP (más confiable en el celular)
+async function importar(){
   showL('Importando desde Sheets...');
-  window._cb=function(j){
-    const el=document.getElementById('_js');if(el)el.remove();
-    clearTimeout(window._cbt);delete window._cb;
+  try{
+    const r=await fetch(GS+'?accion=leer&t='+Date.now());
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j=await r.json();
     hideL();
     if(!j||!j.ok){toast('Error al conectar con Sheets');return}
     const rem=(j.datos||[]).map(d=>({...d,fecha:nF(d.fecha)}));
@@ -344,23 +345,16 @@ function importar(){
     const map={};
     for(const d of D) map[String(d.id)]=d;
     let ag=0;
-    for(const r of rem){if(!map[String(r.id)]){map[String(r.id)]=r;ag++}}
+    for(const r2 of rem){if(!map[String(r2.id)]){map[String(r2.id)]=r2;ag++}}
     D=Object.values(map).sort((a,b)=>nF(b.fecha).localeCompare(nF(a.fecha)));
     D=dedup(D);save();sdot('ok');
     toast('✓ '+ag+' nuevos · '+D.length+' total');
     mA=new Date().getMonth();aA=new Date().getFullYear();
     renderI();renderCfg();
-  };
-  window._cbt=setTimeout(()=>{
-    const el=document.getElementById('_js');if(el)el.remove();
-    delete window._cb;hideL();
+  }catch(e){
+    hideL();sdot('err');
     toast('Sin respuesta de Sheets. Verificá internet.');
-  },12000);
-  const s=document.createElement('script');
-  s.id='_js';
-  s.src=GS+'?accion=leer&callback=_cb&t='+Date.now();
-  s.onerror=()=>{clearTimeout(window._cbt);s.remove();delete window._cb;hideL();toast('Error de conexión con Sheets');};
-  document.head.appendChild(s);
+  }
 }
 
 async function syncS(ac,pl){
