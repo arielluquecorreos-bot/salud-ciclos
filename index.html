@@ -321,14 +321,12 @@ function showL(m){document.getElementById('lmsg').textContent=m||'Cargando...';d
 function hideL(){document.getElementById('lov').classList.remove('open')}
 
 function dedup(arr){
+  // Dedup solo por id único (ya viene único desde la planilla). Antes se
+  // deduplicaba también por tipo+fecha, lo que hacía que registros con
+  // fecha vacía o repetida se pisaran entre sí y se perdieran.
   const m={};
   for(const d of arr) m[String(d.id)]=d;
-  const v=new Set(),r=[];
-  for(const d of Object.values(m)){
-    const k=d.tipo+'|'+nF(d.fecha);
-    if(!v.has(k)){v.add(k);r.push(d)}
-  }
-  return r.sort((a,b)=>nF(b.fecha).localeCompare(nF(a.fecha)));
+  return Object.values(m).sort((a,b)=>nF(b.fecha).localeCompare(nF(a.fecha)));
 }
 
 // IMPORTAR - ahora usa fetch normal en vez de JSONP (más confiable en el celular)
