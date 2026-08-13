@@ -673,8 +673,15 @@ function renderCfg(){
 
 function diag(){
   const el=document.getElementById('diag-out');
+  const anio=new Date().getFullYear();
+  const fuera=D.filter(d=>{
+    const f=nF(d.fecha),p=f.split('-');
+    return !(p.length===3&&+p[0]===anio);
+  }).map(d=>({id:d.id,tipo:d.tipo,fecha:d.fecha,desc:d.desc||d.lugar||''}));
   const muestra=D.slice(0,6).map(d=>({id:d.id,tipo:d.tipo,fecha:d.fecha}));
-  el.textContent='Total: '+D.length+' registros\n\n'+JSON.stringify(muestra,null,2)+'\n\nAño actual detectado: '+new Date().getFullYear();
+  el.textContent='Total: '+D.length+' registros | Año actual: '+anio
+    +'\n\nMuestra (primeros 6):\n'+JSON.stringify(muestra,null,2)
+    +'\n\nRegistros que NO caen en ningún mes de '+anio+' ('+fuera.length+'):\n'+JSON.stringify(fuera,null,2);
   el.style.display='block';
 }
 function borrarTodo(){
